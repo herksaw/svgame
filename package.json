@@ -1,0 +1,10 @@
+{
+  "name": "svgame",
+  "version": "0.1.0",
+  "devDependencies": {
+    "gulp": "~3.6.0",
+    "gulp-clean": "~0.2.4",
+    "gulp-zip": "~0.3.4",
+    "gulp-util": "~2.2.14"
+  }
+}

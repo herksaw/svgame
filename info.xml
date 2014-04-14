@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<c2addon>
+	<!-- One of: plugin, behavior, effect -->
+	<type>plugin</type>
+	
+	<name>SVGame</name>	
+	<version>0.1</version>
+	<author>Herks Aw</author>
+	<website>http://www.herksaw.com</website>
+	<documentation>https://www.herksaw.com</documentation>
+	<description>Provide the user ability to manipulate SVG elements.</description>
+</c2addon>
