@@ -55,9 +55,14 @@
 //				description,		// appears in event wizard dialog when selected
 //				script_name);		// corresponding runtime function name
 				
-// example				
+// example
+/*			
 AddNumberParam("Number", "Enter a number to test if positive.");
 AddCondition(0, cf_none, "Is number positive", "My category", "{0} is positive", "Description for my condition!", "MyCondition");
+*/
+
+AddNumberParam("ID", "Get the element with specified ID.");
+AddCondition(0, cf_none, "Pick element by ID", "Misc", "Pick element with ID {0}", "Pick an SVG element using its ID.", "PickByID");
 
 ////////////////////////////////////////
 // Actions
@@ -104,6 +109,19 @@ AddNumberParam("Height", "Height of the created rectangle.", "0");
 AddNumberParam("Radius", "Radius for rounded corners.", "0");
 AddNumberParam("ID", "ID of the created rectangle.", "0");
 AddAction(3, cf_none, "Create rectangle", "General", "Create rectangle at ({0},{1}) with size ({2},{3}) and radius {4}", "Create an rectangle element in the current layout.", "CreateRectangle");
+
+AddComboParamOption("Invisible");
+AddComboParamOption("Visible");
+AddComboParam("Visibility", "Choose whether the element is hidden or shown.", "Visible");
+AddAction(4, cf_none, "Set element visible", "Appearance", "Set element {0}", "Set the visibility for one or more elements in the current layout.", "SetElementVisible");
+
+AddAction(5, cf_none, "Remove element", "Misc", "Remove element", "Delete one or more elements in the current layout.", "RemoveElement");
+
+AddNumberParam("X", "X co-ordinate at which to place the created text.", "0");
+AddNumberParam("Y", "Y co-ordinate at which to place the created text.", "0");
+AddStringParam("Text", "String for the created text.", "0");
+AddNumberParam("ID", "ID of the created text.", "0");
+AddAction(6, cf_none, "Create text", "General", "Create text at ({0},{1}) with string {2}", "Create a text element in the current layout.", "CreateText");
 
 ////////////////////////////////////////
 // Expressions

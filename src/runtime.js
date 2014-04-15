@@ -54,7 +54,19 @@ cr.plugins_.SVGame = function(runtime)
 		// note the object is sealed after this call; ensure any properties you'll ever need are set on the object
 		// e.g...
 		// this.myValue = 0;
-		this.paper = Raphael(0, 0, this.runtime.width, this.runtime.height);		
+		this.paper = Raphael(0, 0, this.runtime.width, this.runtime.height);
+		this.elements = [];
+
+		// Unfinished window resize event
+		/*
+		window.paper = this.paper;
+		window.onresize = function() {
+			console.log(window.paper)			
+			console.log(window.innerWidth)
+			console.log(window.innerHeight)
+			window.paper.setSize(window.innerWidth, window.innerHeight);
+		};
+		*/
 	};
 	
 	// only called if a layout object - draw to a canvas 2D context
@@ -71,18 +83,22 @@ cr.plugins_.SVGame = function(runtime)
 
 	//////////////////////////////////////
 	// Conditions
-	function Cnds() {};
+	pluginProto.cnds = {};
+	var cndsProto = pluginProto.cnds;
 
 	// the example condition
-	Cnds.prototype.MyCondition = function (myparam)
+	cndsProto.PickByID = function(id)
 	{
-		// return true if number is positive
-		return myparam >= 0;
+		this.elements.forEach(function(element) {
+			if (element.id === id) {
+				element.picked = true;
+			}
+		});
+
+		return hasPicked(this.elements);
 	};
 	
 	// ... other conditions here ...
-	
-	pluginProto.cnds = new Cnds();
 	
 	//////////////////////////////////////
 	// Actions
@@ -90,28 +106,103 @@ cr.plugins_.SVGame = function(runtime)
 	var actsProto = pluginProto.acts;
 
 	// the example action
-	actsProto.CreateCircle = function (x, y, radius, id)
+	actsProto.CreateCircle = function(x, y, radius, id)
 	{
 		var circle = this.paper.circle(x, y, radius);
 		circle.id = id;
+		circle.picked = false;
+
+		this.elements.push(circle);
+
+		// Non-strict mode
+		/*
+		eval("circle" + id + " = " + this.paper.circle(x, y, radius));
+		eval("circle" + id + ".id = " + id);
+		*/
 	};
 
-	actsProto.CreateEllipse = function (x, y, rx, ry, id)
+	actsProto.CreateEllipse = function(x, y, rx, ry, id)
 	{
 		var ellipse = this.paper.ellipse(x, y, rx, ry);
 		ellipse.id = id;
+		ellipse.picked = false;
+
+		this.elements.push(ellipse);
 	};
 
-	actsProto.CreateImage = function (src, x, y, width, height, id)
+	actsProto.CreateImage = function(src, x, y, width, height, id)
 	{
 		var image = this.paper.image(src, x, y, width, height);
 		image.id = id;
+		image.picked = false;
+
+		this.elements.push(image);
 	};
 
-	actsProto.CreateRectangle = function (x, y, width, height, radius, id)
+	actsProto.CreateRectangle = function(x, y, width, height, radius, id)
 	{
 		var rect = this.paper.rect(x, y, width, height, radius);
 		rect.id = id;
+		rect.picked = false;
+
+		this.elements.push(rect);
+	};
+
+	actsProto.CreateText = function(x, y, string, id)
+	{
+		var text = this.paper.text(x, y, string);
+		text.id = id;
+		text.picked = false;
+
+		this.elements.push(text);
+	};
+
+	actsProto.SetElementVisible = function(state)
+	{		
+		if (hasPicked(this.elements)) {
+			this.elements.forEach(function(element) {
+				if (element.picked === true) {
+					element = (state === "Visible") ? element.show() : element.hide();
+				};
+			});
+			clearPicked(this.elements);
+		} else {
+			this.elements.forEach(function(element) {
+				element = (state === "Visible") ? element.show() : element.hide();
+			});
+		};
+	};
+
+	actsProto.RemoveElement = function()
+	{		
+		if (hasPicked(this.elements)) {
+			/*
+			this.pickedElements.forEach(function(pickedElement) {
+				//pickedElement.remove();
+				
+				this.elements.forEach(function(element, index) {
+					if (element.name === pickedElement.name) {
+						element.remove();
+						this.elements.splice(index, 1);
+					};
+				})
+				
+			});
+			*/
+			this.elements = this.elements.filter(function(element) {
+				if (element.picked) {
+					element.remove();					
+				} else {
+					return true;
+				}
+			})
+			clearPicked(this.elements);
+		} else {
+			this.elements.forEach(function(element) {
+				element.remove();
+			});
+			this.elements = [];
+		};
 	};
 	
 	// ... other actions here ...
@@ -121,7 +212,7 @@ cr.plugins_.SVGame = function(runtime)
 	function Exps() {};
 	
 	// the example expression
-	Exps.prototype.MyExpression = function (ret)	// 'ret' must always be the first parameter - always return the expression's result through it!
+	Exps.prototype.MyExpression = function(ret)	// 'ret' must always be the first parameter - always return the expression's result through it!
 	{
 		ret.set_int(1337);				// return our value
 		// ret.set_float(0.5);			// for returning floats
@@ -131,6 +222,18 @@ cr.plugins_.SVGame = function(runtime)
 	
 	// ... other expressions here ...
 	
-	pluginProto.exps = new Exps();
+	pluginProto.exps = new Exps();	
+
+	function hasPicked(elements) {
+		return elements.some(function(element) {
+			return element.picked;
+		});
+	}
+
+	function clearPicked(elements) {
+		return elements.forEach(function(element) {
+			element.picked = false;
+		});
+	}
 
 }());
