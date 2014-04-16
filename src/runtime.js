@@ -11,6 +11,7 @@ assert2(cr.plugins_, "cr.plugins_ not created");
 cr.plugins_.SVGame = function(runtime)
 {
 	this.runtime = runtime;
+	window.svgame = {};	
 };
 
 (function ()
@@ -32,7 +33,7 @@ cr.plugins_.SVGame = function(runtime)
 
 	// called on startup for each object type
 	typeProto.onCreate = function()
-	{
+	{		
 	};
 
 	/////////////////////////////////////
@@ -41,7 +42,8 @@ cr.plugins_.SVGame = function(runtime)
 	{
 		this.type = type;
 		this.runtime = type.runtime;
-		
+		window.svgame.instance = this;
+
 		// any other properties you need, e.g...
 		// this.myValue = 0;
 	};
@@ -54,19 +56,35 @@ cr.plugins_.SVGame = function(runtime)
 		// note the object is sealed after this call; ensure any properties you'll ever need are set on the object
 		// e.g...
 		// this.myValue = 0;
-		this.paper = Raphael(0, 0, this.runtime.width, this.runtime.height);
+
+		var instance = window.svgame.instance;
+		this.instance = instance;
+		window.svgame.instance = null;
+
+		this.paper = Raphael(0, 0, this.instance.width, this.instance.height);
 		this.elements = [];
+		this.aspectRatioWidth = this.runtime.width / instance.width;
+		this.aspectRatioHeight = this.runtime.height / instance.height;
 
 		// Unfinished window resize event
-		/*
-		window.paper = this.paper;
-		window.onresize = function() {
-			console.log(window.paper)			
-			console.log(window.innerWidth)
-			console.log(window.innerHeight)
-			window.paper.setSize(window.innerWidth, window.innerHeight);
-		};
-		*/
+		window.svgame.instances = this.type.instances;
+
+		window.onresize = function() {			
+			window.svgame.instances.forEach(function(instance) {
+
+				instance.aspectRatioWidth = instance.runtime.width / instance.width;
+				instance.aspectRatioHeight = instance.runtime.height / instance.height;
+
+				instance.elements.forEach(function(element) {
+					var argumentString = "";
+					if (element.type === "circle") {
+						console.log("circle")
+						argumentString += /*"t" + (element.x * instance.aspectRatioWidth).toString() + "," + (element.y * instance.aspectRatioHeight).toString() + */"s" + instance.aspectRatioWidth + "," + instance.aspectRatioHeight;
+						element.transform(argumentString);
+					}
+				})
+			})
+		}
 	};
 	
 	// only called if a layout object - draw to a canvas 2D context
@@ -108,9 +126,14 @@ cr.plugins_.SVGame = function(runtime)
 	// the example action
 	actsProto.CreateCircle = function(x, y, radius, id)
 	{
+		x = x * this.aspectRatioWidth;
+		y = y * this.aspectRatioHeight;
+		radius = radius * this.aspectRatioWidth;
+
 		var circle = this.paper.circle(x, y, radius);
 		circle.id = id;
 		circle.picked = false;
+		circle.type = "circle";
 
 		this.elements.push(circle);
 
@@ -126,6 +149,7 @@ cr.plugins_.SVGame = function(runtime)
 		var ellipse = this.paper.ellipse(x, y, rx, ry);
 		ellipse.id = id;
 		ellipse.picked = false;
+		ellipse.type = "ellipse";
 
 		this.elements.push(ellipse);
 	};
@@ -135,6 +159,7 @@ cr.plugins_.SVGame = function(runtime)
 		var image = this.paper.image(src, x, y, width, height);
 		image.id = id;
 		image.picked = false;
+		image.type = "image";
 
 		this.elements.push(image);
 	};
@@ -144,6 +169,7 @@ cr.plugins_.SVGame = function(runtime)
 		var rect = this.paper.rect(x, y, width, height, radius);
 		rect.id = id;
 		rect.picked = false;
+		rect.type = "rect";
 
 		this.elements.push(rect);
 	};
@@ -153,6 +179,7 @@ cr.plugins_.SVGame = function(runtime)
 		var text = this.paper.text(x, y, string);
 		text.id = id;
 		text.picked = false;
+		text.type = "text";
 
 		this.elements.push(text);
 	};
