@@ -8,9 +8,8 @@
 		"author":		"Herks Aw",
 		"help url":		"http://www.herksaw.com",
 		"category":		"General",				// Prefer to re-use existing categories, but you can set anything here
-		"type":			"world",				// either "world" (appears in layout and is drawn), else "object"
-		"rotatable":	true,					// only used when "type" is "world".  Enables an angle property on the object.
-		"flags":		0,
+		"type":			"object",			// only used when "type" is "world".  Enables an angle property on the object.
+		"flags":		pf_singleglobal,
 		"dependency":   "raphael.js"				// uncomment lines to enable flags...
 					//	| pf_singleglobal		// exists project-wide, e.g. mouse, keyboard.  "type" must be "object".
 					//	| pf_texture			// object has a single texture (e.g. tiled background)

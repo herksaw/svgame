@@ -11,7 +11,6 @@ assert2(cr.plugins_, "cr.plugins_ not created");
 cr.plugins_.SVGame = function(runtime)
 {
 	this.runtime = runtime;
-	window.svgame = {};	
 };
 
 (function ()
@@ -57,30 +56,43 @@ cr.plugins_.SVGame = function(runtime)
 		// e.g...
 		// this.myValue = 0;
 
+		// Object specific
+		/*
 		var instance = window.svgame.instance;
 		this.instance = instance;
 		window.svgame.instance = null;
+		*/
+		this.layoutWidth = this.layout.width;
+		this.layoutHeight = this.layout.height;
+		this.runtimeWidth = this.runtime.width;
+		this.runtimeHeight = this.runtime.height;
 
-		this.paper = Raphael(0, 0, this.instance.width, this.instance.height);
+		this.paper = Raphael(0, 0, this.runtime.width, this.runtime.height);
 		this.elements = [];
+		this.scaleWidth = 0;
+		this.scaleHeight = 0;
+		/*
 		this.aspectRatioWidth = this.runtime.width / instance.width;
 		this.aspectRatioHeight = this.runtime.height / instance.height;
+		*/
 
 		// Unfinished window resize event
-		window.svgame.instances = this.type.instances;
+		window.svgame = this;
 
 		window.onresize = function() {			
-			window.svgame.instances.forEach(function(instance) {
-
+			window.svgame.type.instances.forEach(function(instance) {
+				/*
 				instance.aspectRatioWidth = instance.runtime.width / instance.width;
 				instance.aspectRatioHeight = instance.runtime.height / instance.height;
-
-				instance.elements.forEach(function(element) {
+				*/
+				instance.elements.forEach(function(element) {					
 					var argumentString = "";
 					if (element.type === "circle") {
 						console.log("circle")
-						argumentString += /*"t" + (element.x * instance.aspectRatioWidth).toString() + "," + (element.y * instance.aspectRatioHeight).toString() + */"s" + instance.aspectRatioWidth + "," + instance.aspectRatioHeight;
+						argumentString += /*"t" + (element.x * instance.aspectRatioWidth).toString() + "," + (element.y * instance.aspectRatioHeight).toString() + */"s" + Math.sqrt(instance.aspectRatioWidth) + "," + Math.sqrt(instance.aspectRatioHeight);
 						element.transform(argumentString);
+					} else if (element.type === "rect") {
+						console.log("rect")						
 					}
 				})
 			})
@@ -126,9 +138,9 @@ cr.plugins_.SVGame = function(runtime)
 	// the example action
 	actsProto.CreateCircle = function(x, y, radius, id)
 	{
-		x = x * this.aspectRatioWidth;
-		y = y * this.aspectRatioHeight;
-		radius = radius * this.aspectRatioWidth;
+		x = x * this.scaleWidth
+		y = y * this.as.scaleHeight;
+		radius = radius * this.scaleWidth;
 
 		var circle = this.paper.circle(x, y, radius);
 		circle.id = id;
@@ -166,6 +178,14 @@ cr.plugins_.SVGame = function(runtime)
 
 	actsProto.CreateRectangle = function(x, y, width, height, radius, id)
 	{
+		/*
+		this.aspectRatioWidth = (width / this.layout.width) * this.instance.width;
+		this.aspectRatioHeight = (height / this.layout.height) * this.instance.height;
+		*/		
+		for (var i = 0; i < arguments.length - 1; i++) {
+			arguments[i] = (arguments[i] / self.layoutWidth) * self.runtimeWidth;
+		}
+
 		var rect = this.paper.rect(x, y, width, height, radius);
 		rect.id = id;
 		rect.picked = false;
@@ -262,5 +282,4 @@ cr.plugins_.SVGame = function(runtime)
 			element.picked = false;
 		});
 	}
-
 }());
